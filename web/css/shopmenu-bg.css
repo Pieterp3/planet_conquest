@@ -1,0 +1,11 @@
+#menu-bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.main-menu-grid {
+    position: relative;
+    z-index: 1;
+}

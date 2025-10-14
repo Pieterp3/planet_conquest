@@ -1,0 +1,16 @@
+/* shopmenu-grid.css - grid layout for ShopMenu */
+.shopmenu-main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 900px;
+}
+
+.upgrades-panel,
+.abilities-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+    margin-top: 10px;
+}

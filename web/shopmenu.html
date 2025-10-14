@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Game - Shop Menu</title>
+    <link rel="stylesheet" href="css/main-shared.css">
+    <link rel="stylesheet" href="css/shopmenu.css">
+    <link rel="stylesheet" href="css/shopmenu-grid.css">
+    <link rel="stylesheet" href="css/mainmenu-bg.css">
+    <link rel="stylesheet" href="css/donation-dialog.css">
+    <link rel="stylesheet" href="css/message-dialog.css">
+    <script defer src="js/BackgroundArtist.js"></script>
+    <script defer src="js/upgrades.js"></script>
+    <script defer src="js/abilities.js"></script>
+    <script defer src="js/home/game/operators/player/PlayerData.js"></script>
+    <script defer src="js/ShopMenu.js"></script>
+</head>
+
+<body>
+    <canvas id="menu-bg-canvas"></canvas>
+    <script>
+        function initMenuBackground() {
+            var canvas = document.getElementById('menu-bg-canvas');
+            if (canvas && typeof renderMenuBackground === 'function') {
+                renderMenuBackground(canvas);
+            } else {
+                setTimeout(initMenuBackground, 50);
+            }
+        }
+        window.addEventListener('load', initMenuBackground);
+    </script>
+    <div class="shopmenu-container">
+        <div class="shopmenu-header">
+            <span id="coins-label" class="coins-label">
+                <span id="coin-canvas" class="coin-canvas"></span>
+                <span id="coin-count">0</span>
+            </span>
+            <h1>Shop</h1>
+        </div>
+        <div class="shopmenu-tabs">
+            <button class="tab-button active" data-tab="upgrades">Upgrades</button>
+            <button class="tab-button" data-tab="abilities">Abilities</button>
+        </div>
+        <div class="shopmenu-main">
+            <div id="upgrades-panel" class="tab-panel upgrades-panel"></div>
+            <div id="abilities-panel" class="tab-panel abilities-panel"></div>
+        </div>
+        <div class="shopmenu-footer">
+            <button id="donate-button" class="footer-button gold">DONATE GOLD</button>
+            <button id="back-button" class="footer-button">BACK TO MENU</button>
+        </div>
+    </div>
+    <!-- Donation dialog moved to its own component -->
+    <div id="donation-dialog-container"></div>
+    <div id="message-dialog-container"></div>
+    <script>
+        // Load the donation dialog component dynamically
+        fetch('components/DonationDialog.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('donation-dialog-container').innerHTML = html;
+            });
+        // Load the message dialog component dynamically
+        fetch('components/MessageDialog.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('message-dialog-container').innerHTML = html;
+            });
+    </script>
+</body>
+
+</html>

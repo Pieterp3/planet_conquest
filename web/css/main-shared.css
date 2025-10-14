@@ -1,0 +1,258 @@
+/* main-shared.css - Shared styles for dialogs, buttons, grids, and backgrounds */
+
+/* Modal Dialog Base Styles */
+.modal,
+.donation-modal,
+.message-modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.2s;
+    background: rgba(20, 24, 38, 0.92);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+/* Modal Content Base */
+.modal-content,
+.donation-modal-content,
+.message-modal-content {
+    background: linear-gradient(135deg, #232a3b 80%, #2e3a5c 100%);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    padding: 32px 36px 28px 36px;
+    text-align: center;
+    min-width: 320px;
+    max-width: 90vw;
+    color: #f6f7fa;
+    border: 2px solid #3e4a6b;
+    position: relative;
+}
+
+/* Modal Close Button */
+.close,
+.donation-modal .close,
+.message-modal .close {
+    position: absolute;
+    top: 18px;
+    right: 28px;
+    font-size: 2em;
+    color: #bfc8e2;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close:hover,
+.donation-modal .close:hover,
+.message-modal .close:hover {
+    color: #ffe066;
+}
+
+/* Dialog Titles */
+.donation-title,
+.message-title,
+.title {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    color: #ffe066;
+    text-shadow: 0 2px 8px #232a3b;
+}
+
+/* Dialog Descriptions */
+.donation-desc,
+.message-desc,
+.subtitle {
+    font-size: 1.1em;
+    margin-bottom: 18px;
+    color: #bfc8e2;
+}
+
+/* Buttons */
+.menu-btn,
+.tab-button,
+.footer-button,
+.donation-confirm,
+.message-confirm {
+    display: block;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    margin: 12px auto;
+    padding: 10px 32px;
+}
+
+/* Button Color Variants */
+.easy {
+    background: #329632;
+    color: #fff;
+}
+
+.easy:hover {
+    background: #46b846;
+}
+
+.medium {
+    background: #b6b632;
+    color: #fff;
+}
+
+.medium:hover {
+    background: #dcdc46;
+}
+
+.hard {
+    background: #b66432;
+    color: #fff;
+}
+
+.hard:hover {
+    background: #dc8232;
+}
+
+.extreme {
+    background: #b63232;
+    color: #fff;
+}
+
+.extreme:hover {
+    background: #dc4646;
+}
+
+.shop {
+    background: #ffd700;
+    color: #222;
+}
+
+.shop:hover {
+    background: #ffe066;
+}
+
+.achievements {
+    background: #800080;
+    color: #fff;
+}
+
+.achievements:hover {
+    background: #a020a0;
+}
+
+.help {
+    background: #32b832;
+    color: #fff;
+}
+
+.help:hover {
+    background: #46dc46;
+}
+
+.settings {
+    background: #4682b4;
+    color: #fff;
+}
+
+.settings:hover {
+    background: #5a9bdc;
+}
+
+.exit {
+    background: #643232;
+    color: #fff;
+}
+
+.exit:hover {
+    background: #a04646;
+}
+
+.footer-button.gold {
+    background: linear-gradient(90deg, #ffe066 60%, #ffd700 100%);
+    color: #222;
+}
+
+/* Grid Layouts */
+.main-menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0px;
+    background: rgba(10, 20, 40, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 0 32px #222;
+    padding: 40px 32px 32px 32px;
+    width: 480px;
+    margin: 40px auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Background Canvas */
+#menu-bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    background: transparent;
+}
+
+/* Coin Label */
+.coins-label {
+    display: flex;
+    align-items: center;
+    font-size: 1.3em;
+    color: #ffe066;
+    background: rgba(30, 30, 30, 0.7);
+    border-radius: 18px;
+    padding: 6px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.coin-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+}
+
+/* Input Fields */
+.donation-input {
+    font-size: 1.2em;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #3e4a6b;
+    background: #232a3b;
+    color: #ffe066;
+    margin-bottom: 18px;
+    width: 120px;
+    text-align: center;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Tab Panels */
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.upgrades-panel,
+.abilities-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+    margin-top: 10px;
+}

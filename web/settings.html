@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Game - Settings</title>
+    <link rel="stylesheet" href="../css/main-shared.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Orbitron', monospace;
+            overflow-x: hidden;
+        }
+
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .settings-header h1 {
+            font-size: 3rem;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #00f;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 100, 255, 0.8);
+            border: 2px solid #00f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-family: 'Orbitron', monospace;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background: #00f;
+            box-shadow: 0 0 20px #00f;
+        }
+
+        .settings-section {
+            background: rgba(0, 0, 20, 0.8);
+            border: 2px solid #00f;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+
+        .settings-section h2 {
+            color: #00bfff;
+            border-bottom: 1px solid #00f;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px 0;
+        }
+
+        .setting-label {
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        .setting-control {
+            flex: 0 0 auto;
+            margin-left: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            border: 2px solid #555;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: #999;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #00f;
+            border-color: #00bfff;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+            background-color: #fff;
+        }
+
+        .range-slider {
+            width: 200px;
+            height: 6px;
+            background: #333;
+            border-radius: 5px;
+            outline: none;
+            appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00f;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #00bfff;
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #00f;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #00bfff;
+        }
+
+        .color-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 40px);
+            gap: 10px;
+            max-width: 300px;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .color-option.selected {
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .settings-button {
+            background: rgba(0, 100, 255, 0.8);
+            border: 2px solid #00f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .settings-button:hover {
+            background: #00f;
+            box-shadow: 0 0 20px #00f;
+        }
+
+        .settings-button.danger {
+            background: rgba(255, 50, 50, 0.8);
+            border-color: #f00;
+        }
+
+        .settings-button.danger:hover {
+            background: #f00;
+            box-shadow: 0 0 20px #f00;
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 10px;
+            }
+
+            .settings-header h1 {
+                font-size: 2rem;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .setting-control {
+                margin-left: 0;
+                align-self: flex-end;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="background-canvas"></canvas>
+    <a href="mainmenu.html" class="back-button">← Back to Menu</a>
+
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>Settings</h1>
+            <p>Customize your gaming experience</p>
+        </div>
+
+        <div class="settings-section">
+            <h2>🎮 Gameplay Settings</h2>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Show Connection Lines</strong><br>
+                    <small>Display targeting lines between ships and destinations</small>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="connection-lines" checked aria-label="Show Connection Lines">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Show Visual Effects</strong><br>
+                    <small>Display particle effects and animations</small>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="visual-effects" checked aria-label="Show Visual Effects">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Show Projectiles</strong><br>
+                    <small>Display combat projectiles and trails</small>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="show-projectiles" checked aria-label="Show Projectiles">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Connection Line Opacity</strong><br>
+                    <small>Transparency of targeting lines</small>
+                </div>
+                <div class="setting-control">
+                    <label for="line-opacity" class="sr-only">Connection Line Opacity</label>
+                    <input type="range" id="line-opacity" class="range-slider" min="0" max="100" value="60" aria-label="Connection Line Opacity">
+                    <span id="opacity-value">60%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2>🎨 Visual Settings</h2>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Player Planet Color</strong><br>
+                    <small>Choose your planet color scheme</small>
+                </div>
+            </div>
+            <div class="color-selector" id="color-selector">
+                <div class="color-option selected" data-color="#0066FF" style="background-color: #0066FF;"></div>
+                <div class="color-option" data-color="#FF0066" style="background-color: #FF0066;"></div>
+                <div class="color-option" data-color="#00FF66" style="background-color: #00FF66;"></div>
+                <div class="color-option" data-color="#FF6600" style="background-color: #FF6600;"></div>
+                <div class="color-option" data-color="#6600FF" style="background-color: #6600FF;"></div>
+                <div class="color-option" data-color="#FF0000" style="background-color: #FF0000;"></div>
+                <div class="color-option" data-color="#00FFFF" style="background-color: #00FFFF;"></div>
+                <div class="color-option" data-color="#FFFF00" style="background-color: #FFFF00;"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2>🔊 Audio Settings</h2>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Master Volume</strong><br>
+                    <small>Overall game volume</small>
+                </div>
+                <div class="setting-control">
+                    <label for="master-volume" class="sr-only">Master Volume</label>
+                    <input type="range" id="master-volume" class="range-slider" min="0" max="100" value="75" aria-label="Master Volume">
+                    <span id="volume-value">75%</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Sound Effects</strong><br>
+                    <small>Combat and interaction sounds</small>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sound-effects" checked aria-label="Enable Sound Effects">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <strong>Background Music</strong><br>
+                    <small>Ambient space music</small>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="background-music" checked aria-label="Enable Background Music">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2>💾 Data Management</h2>
+
+            <div class="button-group">
+                <button class="settings-button" id="save-settings">Save Settings</button>
+                <button class="settings-button" id="reset-settings">Reset to Defaults</button>
+                <button class="settings-button danger" id="clear-data">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/BackgroundArtist.js"></script>
+    <script src="../js/home/game/VisualSettings.js"></script>
+    <script>
+        // Initialize background
+        const bgCanvas = document.getElementById('background-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        function resizeBackground() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+
+        resizeBackground();
+        window.addEventListener('resize', resizeBackground);
+
+        function animateBackground() {
+            if (window.BackgroundArtist && window.BackgroundArtist.renderBackground) {
+                window.BackgroundArtist.renderBackground(bgCtx);
+            }
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
+
+        // Settings management
+        let settings = {
+            connectionLines: true,
+            visualEffects: true,
+            showProjectiles: true,
+            lineOpacity: 60,
+            playerColor: '#0066FF',
+            masterVolume: 75,
+            soundEffects: true,
+            backgroundMusic: true
+        };
+
+        // Load settings
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem('planetGame_settings');
+                if (savedSettings) {
+                    settings = { ...settings, ...JSON.parse(savedSettings) };
+                }
+
+                // Load from VisualSettings if available
+                if (window.VisualSettings) {
+                    const visualSettings = window.VisualSettings.getInstance();
+                    settings.connectionLines = visualSettings.isDisplayConnectionLines();
+                    settings.visualEffects = visualSettings.displayEffects || true;
+                    settings.showProjectiles = visualSettings.displayProjectiles || true;
+                    settings.lineOpacity = (visualSettings.connectionLineOpacity || 0.6) * 100;
+                    settings.playerColor = visualSettings.playerPlanetColor || '#0066FF';
+                }
+            } catch (e) {
+                console.warn('Failed to load settings:', e);
+            }
+
+            updateUI();
+        }
+
+        // Save settings
+        function saveSettings() {
+            try {
+                localStorage.setItem('planetGame_settings', JSON.stringify(settings));
+
+                // Save to VisualSettings if available
+                if (window.VisualSettings) {
+                    const visualSettings = window.VisualSettings.getInstance();
+                    visualSettings.setDisplayConnectionLines(settings.connectionLines);
+                    visualSettings.displayEffects = settings.visualEffects;
+                    visualSettings.displayProjectiles = settings.showProjectiles;
+                    visualSettings.connectionLineOpacity = settings.lineOpacity / 100;
+                    visualSettings.playerPlanetColor = settings.playerColor;
+                }
+
+                alert('Settings saved successfully!');
+            } catch (e) {
+                console.error('Failed to save settings:', e);
+                alert('Failed to save settings.');
+            }
+        }
+
+        // Update UI elements
+        function updateUI() {
+            document.getElementById('connection-lines').checked = settings.connectionLines;
+            document.getElementById('visual-effects').checked = settings.visualEffects;
+            document.getElementById('show-projectiles').checked = settings.showProjectiles;
+            document.getElementById('line-opacity').value = settings.lineOpacity;
+            document.getElementById('opacity-value').textContent = settings.lineOpacity + '%';
+            document.getElementById('master-volume').value = settings.masterVolume;
+            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
+            document.getElementById('sound-effects').checked = settings.soundEffects;
+            document.getElementById('background-music').checked = settings.backgroundMusic;
+
+            // Update color selector
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.color === settings.playerColor) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        // Event listeners
+        document.getElementById('connection-lines').addEventListener('change', (e) => {
+            settings.connectionLines = e.target.checked;
+        });
+
+        document.getElementById('visual-effects').addEventListener('change', (e) => {
+            settings.visualEffects = e.target.checked;
+        });
+
+        document.getElementById('show-projectiles').addEventListener('change', (e) => {
+            settings.showProjectiles = e.target.checked;
+        });
+
+        document.getElementById('line-opacity').addEventListener('input', (e) => {
+            settings.lineOpacity = parseInt(e.target.value);
+            document.getElementById('opacity-value').textContent = settings.lineOpacity + '%';
+        });
+
+        document.getElementById('master-volume').addEventListener('input', (e) => {
+            settings.masterVolume = parseInt(e.target.value);
+            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
+        });
+
+        document.getElementById('sound-effects').addEventListener('change', (e) => {
+            settings.soundEffects = e.target.checked;
+        });
+
+        document.getElementById('background-music').addEventListener('change', (e) => {
+            settings.backgroundMusic = e.target.checked;
+        });
+
+        // Color selector
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                settings.playerColor = option.dataset.color;
+            });
+        });
+
+        // Button handlers
+        document.getElementById('save-settings').addEventListener('click', saveSettings);
+
+        document.getElementById('reset-settings').addEventListener('click', () => {
+            if (confirm('Reset all settings to defaults?')) {
+                settings = {
+                    connectionLines: true,
+                    visualEffects: true,
+                    showProjectiles: true,
+                    lineOpacity: 60,
+                    playerColor: '#0066FF',
+                    masterVolume: 75,
+                    soundEffects: true,
+                    backgroundMusic: true
+                };
+                updateUI();
+                saveSettings();
+            }
+        });
+
+        document.getElementById('clear-data').addEventListener('click', () => {
+            if (confirm('This will delete ALL game data including progress, coins, and achievements. Are you sure?')) {
+                if (confirm('This action cannot be undone. Continue?')) {
+                    localStorage.clear();
+                    alert('All data cleared. The page will reload.');
+                    location.reload();
+                }
+            }
+        });
+
+        // Initialize
+        loadSettings();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Planet Game - Game Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/main-shared.css">
+    <link rel="stylesheet" href="../css/mainmenu-bg.css">
+    <link rel="stylesheet" href="../css/mainmenu.css">
+    <link rel="stylesheet" href="../css/shopmenu-bg.css">
+    <link rel="stylesheet" href="../css/shopmenu.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: transparent;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+
+        #pauseOverlay,
+        #gameOverOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #abilityTooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            display: none;
+            z-index: 20;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <!-- Upgrades Panel for ShopMenu.js (hidden by default, but present for JS) -->
+    <div id="upgrades-panel" class="hidden"></div>
+    <div id="pauseOverlay">
+        <h1>Game Paused</h1><button id="resumeBtn">Resume</button>
+    </div>
+    <div id="gameOverOverlay">
+        <h1>Game Over</h1><button id="restartBtn">Restart</button>
+    </div>
+    <div id="abilityTooltip"></div>
+
+    <!-- Core game engine scripts -->
+    <script src="../js/home/game/GameConstants.js"></script>
+    <script src="../js/BackgroundArtist.js"></script>
+    <script src="../js/home/game/planets/Planet.js"></script>
+    <script src="../js/home/game/Ship.js"></script>
+    <script src="../js/home/game/Projectile.js"></script>
+    <script src="../js/home/game/Game.js"></script>
+    <script src="../js/home/game/Engine.js"></script>
+
+    <!-- Ability system -->
+    <script src="../js/home/game/abilities/BlackHole.js"></script>
+    <script src="../js/home/game/abilities/AbilityManager.js"></script>
+
+    <!-- Artist/Rendering classes -->
+    <script src="../js/home/game/PlanetArtist.js"></script>
+    <script src="../js/home/game/ShipArtist.js"></script>
+    <script src="../js/home/game/EffectsArtist.js"></script>
+
+    <!-- Planet features -->
+    <script src="../js/home/game/planets/PlanetFeatures.js"></script>
+    <script src="../js/home/game/planets/Moon.js"></script>
+    <script src="../js/home/game/planets/Ring.js"></script>
+    <script src="../js/home/game/planets/Crater.js"></script>
+
+    <!-- Operators and combat -->
+    <script src="../js/home/game/operators/Operator.js"></script>
+    <script src="../js/home/game/operators/player/Player.js"></script>
+    <script src="../js/home/game/operators/Bot.js"></script>
+    <script src="../js/home/game/combat/CombatManager.js"></script>
+
+    <!-- Data persistence -->
+    <script src="../js/home/game/operators/player/PlayerData.js"></script>
+    <script src="../js/home/game/VisualSettings.js"></script>
+    <script src="../js/home/game/challenges/ChallengeManager.js"></script>
+
+    <!-- UI components -->
+    <script src="../js/ShopMenu.js"></script>
+    <script src="../js/upgrades.js"></script>
+    <script src="../js/abilities.js"></script>
+    <script>
+        // --- JS mocks for missing classes ---
+        if (!window.PlayerData) {
+            window.PlayerData = function () {
+                this.coins = 1000;
+                this.abilities = {};
+                this.upgrades = {};
+            };
+            window.PlayerData.getInstance = function () {
+                if (!window._playerData) window._playerData = new window.PlayerData();
+                return window._playerData;
+            };
+            window.PlayerData.prototype.isAbilityUnlocked = function (type) { return true; };
+        }
+        if (!window.VisualSettings) {
+            window.VisualSettings = function () {
+                this.displayConnectionLines = true;
+            };
+            window.VisualSettings.getInstance = function () {
+                if (!window._visualSettings) window._visualSettings = new window.VisualSettings();
+                return window._visualSettings;
+            };
+            window.VisualSettings.prototype.isDisplayConnectionLines = function () { return this.displayConnectionLines; };
+            window.VisualSettings.prototype.setDisplayConnectionLines = function (val) { this.displayConnectionLines = val; };
+            window.VisualSettings.prototype.getAbilityForKey = function (keyCode) { return null; };
+        }
+        if (!window.ChallengeManager) {
+            window.ChallengeManager = function () { };
+            window.ChallengeManager.getInstance = function () {
+                if (!window._challengeManager) window._challengeManager = new window.ChallengeManager();
+                return window._challengeManager;
+            };
+            window.ChallengeManager.prototype.getPendingNotifications = function () { return []; };
+        }
+        // --- Utility: Find planet at coordinates ---
+        function findPlanetAt(x, y) {
+            let planets = game.getPlanets();
+            for (let i = 0; i < planets.length; i++) {
+                let planet = planets[i];
+                let dx = planet.x - x;
+                let dy = planet.y - y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < (planet.radius || 35)) return planet;
+            }
+            return null;
+        }
+        // --- Core GameMenu logic ---
+        // This is a simplified JS port of GameMenu.java
+        // Assumes existence of supporting JS classes for planets, ships, abilities, etc.
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Make canvas responsive
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let frameCount = 0;
+        let lastTime = Date.now();
+        let game = null; // Should be set to a JS game engine instance
+        let selectedPlanet = null;
+        let hoveredPlanet = null;
+        let mousePosition = null;
+        let isDragging = false;
+        let hoveredAbility = null;
+        let showAbilityTooltip = false;
+        let abilityTooltipText = '';
+        let tooltipPosition = null;
+        let winPopupShown = false;
+        let clickedPlanet = null;
+        let clickedPlanetClearTime = 0;
+
+        // Overlay elements
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const abilityTooltip = document.getElementById('abilityTooltip');
+
+        // --- Initialize actual game engine ---
+        function initializeGame(difficulty = 'MEDIUM') {
+            try {
+                // Create difficulty enum value
+                const diff = window.Difficulty ? window.Difficulty[difficulty] : {
+                    getBotCount: () => 3,
+                    getPlanetCount: () => 10,
+                    getBotDecisionInterval: () => 2000,
+                    getBotAggressiveness: () => 0.7,
+                    getBotEfficiency: () => 1.0,
+                    getBotsGetAbilities: () => false,
+                    getEnemyPlanetRatio: () => 0.5
+                };
+
+                // Create the main game object
+                if (window.Game) {
+                    return new window.Game(diff);
+                } else {
+                    console.warn('Game class not found, using dummy object');
+                    return createDummyGame();
+                }
+            } catch (error) {
+                console.error('Failed to initialize game:', error);
+                return createDummyGame();
+            }
+        }
+
+        function createDummyGame() {
+            return {
+                getPlanets: () => [],
+                getShips: () => [],
+                getProjectiles: () => [],
+                getExplosions: () => [],
+                getElapsedTime: () => Date.now() - lastTime,
+                getDifficulty: () => 'MEDIUM',
+                getPlayer: () => null,
+                getAbilityManager: () => window.AbilityManager || {},
+                getEngine: () => ({ enableSlowMode: () => { }, disableSlowMode: () => { }, isPaused: () => false }),
+                isGameEnded: () => false,
+                isPaused: () => false,
+                pause: () => { },
+                resume: () => { },
+                start: () => { },
+                tick: () => { }
+            };
+        }
+
+        // Initialize the game
+        game = initializeGame('MEDIUM');
+
+        // Initialize GameMenu if available
+        let gameMenu = null;
+        if (window.GameMenu && game) {
+            try {
+                const frameObj = {
+                    pauseMenu: { show: () => showPause(), hide: () => hidePause() },
+                    gameOverMenu: { show: () => showGameOver(), hide: () => hideGameOver() }
+                };
+                gameMenu = new window.GameMenu(game, frameObj);
+            } catch (error) {
+                console.warn('Failed to initialize GameMenu:', error);
+            }
+        }
+
+        // --- Main game loop ---
+        function gameLoop() {
+            // If GameMenu is handling the loop, let it do so
+            if (gameMenu) {
+                return; // GameMenu handles its own loop
+            }
+
+            // Fallback loop for when GameMenu is not available
+            if (game.isGameEnded() && !winPopupShown) {
+                winPopupShown = true;
+                showGameOver();
+            }
+            renderGame(ctx);
+            frameCount++;
+            if (Date.now() - lastTime >= 1000) {
+                document.title = `Space Game - FPS: ${frameCount}`;
+                frameCount = 0;
+                lastTime = Date.now();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function renderGame(g) {
+            // Clear canvas
+            g.clearRect(0, 0, canvas.width, canvas.height);
+            // Background
+            if (window.BackgroundArtist) window.BackgroundArtist.renderBackground(g);
+            // Render planets
+            if (window.PlanetArtist && game && game.getPlanets) {
+                try {
+                    if (!window._planetArtist) window._planetArtist = new window.PlanetArtist();
+                    const planets = game.getPlanets();
+                    if (planets && typeof window._planetArtist.setPlanets === 'function') {
+                        window._planetArtist.setPlanets(planets);
+                        window._planetArtist.setHoveredPlanet(hoveredPlanet);
+                        window._planetArtist.setClickedPlanet(clickedPlanet);
+                        window._planetArtist.setSelectedPlanet(selectedPlanet);
+                        window._planetArtist.renderPlanets(g);
+                    }
+                } catch (e) {
+                    console.warn('Planet rendering error:', e);
+                }
+            }
+            // Render ships
+            if (window.ShipArtist && game && game.getShips) {
+                try {
+                    if (!window._shipArtist) window._shipArtist = new window.ShipArtist(window._planetArtist);
+                    const ships = game.getShips();
+                    const projectiles = game.getProjectiles();
+                    if (ships && typeof window._shipArtist.setShips === 'function') {
+                        window._shipArtist.setShips(ships);
+                        window._shipArtist.setProjectiles(projectiles);
+                        window._shipArtist.renderShips(g);
+                    }
+                } catch (e) {
+                    console.warn('Ship rendering error:', e);
+                }
+            }
+            // Render explosions
+            game.getExplosions().forEach(e => e.render(g));
+            // Draw connection line when dragging
+            if (isDragging && selectedPlanet && mousePosition) {
+                g.save();
+                g.strokeStyle = '#fff';
+                g.lineWidth = 2;
+                g.beginPath();
+                g.moveTo(selectedPlanet.x, selectedPlanet.y);
+                g.lineTo(mousePosition.x, mousePosition.y);
+                g.stroke();
+                g.restore();
+            }
+            // Draw connection line for click targeting
+            if (clickedPlanet && hoveredPlanet && hoveredPlanet !== clickedPlanet) {
+                g.save();
+                g.strokeStyle = '#fff';
+                g.lineWidth = 2;
+                g.beginPath();
+                g.moveTo(clickedPlanet.x, clickedPlanet.y);
+                g.lineTo(hoveredPlanet.x, hoveredPlanet.y);
+                g.stroke();
+                g.restore();
+            }
+            // Render ability diamonds
+            let playerData = window.PlayerData.getInstance();
+            let diamondSize = 50;
+            let spacing = 10;
+            let startX = 20;
+            let startY = window.GameConstants.getGameHeight() - 80;
+            let index = 0;
+            for (let key in window.AbilityType) {
+                let abilityType = window.AbilityType[key];
+                if (!playerData.isAbilityUnlocked(abilityType)) continue;
+                let x = startX;
+                let y = startY - (index * (diamondSize + spacing));
+                let remainingCooldown = game.getAbilityManager().getRemainingCooldown(abilityType);
+                let onCooldown = remainingCooldown > 0;
+                let abilityActive = game.getAbilityManager().isAbilityActive(abilityType);
+                let diamondColor = abilityActive ? 'rgba(0,255,0,0.7)' : (onCooldown ? 'rgba(128,128,128,0.7)' : 'rgba(0,150,255,0.7)');
+                g.save();
+                g.fillStyle = diamondColor;
+                g.beginPath();
+                g.moveTo(x + diamondSize / 2, y);
+                g.lineTo(x + diamondSize, y + diamondSize / 2);
+                g.lineTo(x + diamondSize / 2, y + diamondSize);
+                g.lineTo(x, y + diamondSize / 2);
+                g.closePath();
+                g.fill();
+                g.strokeStyle = '#fff';
+                g.lineWidth = 2;
+                g.stroke();
+                g.restore();
+                // Draw icon
+                abilityType.drawIcon(g, x + diamondSize / 2, y + diamondSize / 2, diamondSize - 8, abilityActive);
+                index++;
+            }
+            // Render achievement notifications
+            let challengeManager = window.ChallengeManager ? window.ChallengeManager.getInstance() : null;
+            if (challengeManager) {
+                let currentY = 20;
+                let notifications = challengeManager.getPendingNotifications ? challengeManager.getPendingNotifications() : { achievements: [], progress: [] };
+                let achievements = notifications.achievements || [];
+                achievements.forEach(notif => {
+                    // Render notification (simple)
+                    g.save();
+                    g.fillStyle = 'rgba(0,0,0,0.8)';
+                    g.fillRect(window.GameConstants.getGameWidth() - 370, currentY, 350, 80);
+                    g.fillStyle = '#fff';
+                    g.font = 'bold 16px Arial';
+                    g.fillText('ACHIEVEMENT UNLOCKED!', window.GameConstants.getGameWidth() - 355, currentY + 25);
+                    g.font = 'bold 14px Arial';
+                    g.fillStyle = '#4af';
+                    g.fillText(notif.getChallengeName(), window.GameConstants.getGameWidth() - 355, currentY + 45);
+                    g.font = '12px Arial';
+                    g.fillStyle = '#ffd700';
+                    g.fillText('+' + notif.getCoinReward() + ' coins, +' + notif.getScoreReward() + ' score', window.GameConstants.getGameWidth() - 355, currentY + 65);
+                    g.restore();
+                    currentY += 90;
+                });
+            }
+        }
+
+        function showPause() {
+            pauseOverlay.style.display = 'flex';
+        }
+        function hidePause() {
+            pauseOverlay.style.display = 'none';
+        }
+        function showGameOver() {
+            gameOverOverlay.style.display = 'flex';
+        }
+        function hideGameOver() {
+            gameOverOverlay.style.display = 'none';
+        }
+
+        // --- Mouse and keyboard event handling ---
+        canvas.addEventListener('mousedown', (e) => {
+            // Drag targeting logic
+            selectedPlanet = findPlanetAt(e.offsetX, e.offsetY);
+            if (selectedPlanet && selectedPlanet.operator === game.getPlayer() && !clickedPlanet) {
+                isDragging = true;
+                mousePosition = { x: e.offsetX, y: e.offsetY };
+                game.getEngine().enableSlowMode();
+            } else {
+                selectedPlanet = null;
+            }
+        });
+        canvas.addEventListener('mouseup', (e) => {
+            // Drag release logic
+            if (isDragging && selectedPlanet && selectedPlanet.operator === game.getPlayer()) {
+                let targetPlanet = findPlanetAt(e.offsetX, e.offsetY);
+                if (targetPlanet && targetPlanet !== selectedPlanet) {
+                    // Ship deployment
+                    let ship = new window.Ship(selectedPlanet.x, selectedPlanet.y, selectedPlanet.operator, selectedPlanet, targetPlanet);
+                    game.ships.push(ship);
+                    selectedPlanet.operator.addShip(ship);
+                }
+            }
+            game.getEngine().disableSlowMode();
+            selectedPlanet = null;
+            isDragging = false;
+            mousePosition = null;
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            // Hover logic for planets and abilities
+            hoveredPlanet = findPlanetAt(e.offsetX, e.offsetY);
+        });
+        canvas.addEventListener('click', (e) => {
+            // Click targeting logic
+            let clicked = findPlanetAt(e.offsetX, e.offsetY);
+            if (clickedPlanet && clicked === clickedPlanet) {
+                clickedPlanet = null;
+            } else if (!clickedPlanet && clicked) {
+                clickedPlanet = clicked;
+            } else if (clickedPlanet && clicked && clickedPlanet !== clicked) {
+                // Ship deployment
+                let ship = new window.Ship(clickedPlanet.x, clickedPlanet.y, clickedPlanet.operator, clickedPlanet, clicked);
+                game.ships.push(ship);
+                clickedPlanet.operator.addShip(ship);
+                clickedPlanet = null;
+            } else {
+                clickedPlanet = null;
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyP') {
+                if (game.isPaused()) {
+                    hidePause();
+                    game.resume();
+                } else {
+                    showPause();
+                    game.pause();
+                }
+            } else if (e.code === 'Escape') {
+                // Cancel targeting
+                isDragging = false;
+                selectedPlanet = null;
+                mousePosition = null;
+                clickedPlanet = null;
+                clickedPlanetClearTime = 0;
+                showPause();
+                game.pause();
+            } else if (e.code === 'Tab') {
+                // Toggle connection line visibility
+                let settings = window.VisualSettings.getInstance();
+                settings.setDisplayConnectionLines(!settings.isDisplayConnectionLines());
+            } else {
+                // Ability keybinds
+                let settings = window.VisualSettings.getInstance();
+                let ability = settings.getAbilityForKey(e.keyCode);
+                if (ability && game.getAbilityManager().activateAbility(ability)) {
+                    // Ability activated
+                }
+            }
+        });
+        resumeBtn.addEventListener('click', () => {
+            hidePause();
+            game.resume();
+        });
+        restartBtn.addEventListener('click', () => {
+            hideGameOver();
+            // Restart game logic
+            game.start();
+            winPopupShown = false;
+        });
+
+        // --- Ability tooltip logic ---
+        function showAbilityTooltipFn(x, y, text) {
+            abilityTooltip.style.left = x + 'px';
+            abilityTooltip.style.top = y + 'px';
+            abilityTooltip.innerText = text;
+            abilityTooltip.style.display = 'block';
+        }
+        function hideAbilityTooltipFn() {
+            abilityTooltip.style.display = 'none';
+        }
+
+        // --- Start game loop ---
+        game.start();
+        gameLoop();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script defer src="js/PersistentStorage.js"></script>
+    <script defer src="js/home/game/challenges/ChallengeManager.js"></script>
+    <script defer src="js/AchievementMenu.js"></script>
+    <script src="js/BackgroundArtist.js"></script>
+    <link rel="stylesheet" href="css/main-shared.css">
+    <link rel="stylesheet" href="css/mainmenu-bg.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Conquest - Main Menu</title>
+    <link rel="stylesheet" href="css/mainmenu.css">
+    <link rel="stylesheet" href="css/mainmenu-grid.css">
+</head>
+
+<body>
+    <canvas id="menu-bg-canvas" class="fullscreen-canvas"></canvas>
+    <div class="main-menu-grid">
+        <!-- Upgrades Panel for ShopMenu.js (hidden by default, but present for JS) -->
+        <div id="upgrades-panel" class="hidden"></div>
+        <div class="title">PLANET CONQUEST</div>
+        <div class="subtitle">Select Difficulty</div>
+        <button class="menu-btn easy" onclick="openGameMenu('EASY')">EASY</button>
+        <button class="menu-btn medium" onclick="openGameMenu('MEDIUM')">MEDIUM</button>
+        <button class="menu-btn hard" onclick="openGameMenu('HARD')">HARD</button>
+        <button class="menu-btn extreme" onclick="openGameMenu('EXTREME')">EXTREME</button>
+        <button class="menu-btn shop" onclick="openShop()">SHOP</button>
+        <button class="menu-btn achievements" onclick="openAchievements()">ACHIEVEMENTS</button>
+        <button class="menu-btn help" onclick="openHelp()">HELP &amp; TUTORIAL</button>
+        <button class="menu-btn settings" onclick="openSettings()">SETTINGS</button>
+        <button class="menu-btn exit" onclick="exitGame()">EXIT GAME</button>
+    </div>
+    <script>
+        function initMenuBackground() {
+            var canvas = document.getElementById('menu-bg-canvas');
+            if (!canvas) return;
+
+            // Set canvas size to full window
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Resize handler
+            window.addEventListener('resize', function () {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            // Animate background
+            function animateBackground() {
+                if (window.BackgroundArtist && window.BackgroundArtist.renderBackground) {
+                    var ctx = canvas.getContext('2d');
+                    window.BackgroundArtist.renderBackground(ctx);
+                }
+                requestAnimationFrame(animateBackground);
+            }
+
+            animateBackground();
+        }
+        window.addEventListener('load', initMenuBackground);
+
+        function openGameMenu(difficulty) {
+            // Implement navigation to game menu with selected difficulty
+            window.location.href = 'gamemenu.html?difficulty=' + encodeURIComponent(difficulty);
+        }
+        function openShop() {
+            window.location.href = 'shopmenu.html';
+        }
+        function openAchievements() {
+            // Navigate to achievements page
+            window.location.href = 'achievements.html';
+        }
+        function openHelp() {
+            // Navigate to help page
+            window.location.href = 'helpmenu.html';
+        }
+        function openSettings() {
+            // Navigate to settings page
+            window.location.href = 'settings.html';
+        }
+        function exitGame() {
+            // Implement exit logic (redirect to goodbye page)
+            window.location.href = 'goodbye.html';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,144 @@
+body {
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-menu {
+    background: rgba(10, 20, 40, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 0 32px #222;
+    padding: 40px 32px 32px 32px;
+    width: 480px;
+    text-align: center;
+}
+
+.title {
+    font-size: 2.8em;
+    font-weight: bold;
+    color: #64a0ff;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-size: 1.3em;
+    color: #fff;
+    margin-bottom: 24px;
+}
+
+.menu-btn {
+    display: block;
+    width: 80%;
+    margin: 12px auto;
+    padding: 16px 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.easy {
+    background: #329632;
+    color: #fff;
+}
+
+.easy:hover {
+    background: #46b846;
+}
+
+.medium {
+    background: #b6b632;
+    color: #fff;
+}
+
+.medium:hover {
+    background: #dcdc46;
+}
+
+.hard {
+    background: #b66432;
+    color: #fff;
+}
+
+.hard:hover {
+    background: #dc8232;
+}
+
+.extreme {
+    background: #b63232;
+    color: #fff;
+}
+
+.extreme:hover {
+    background: #dc4646;
+}
+
+.shop {
+    background: #ffd700;
+    color: #222;
+}
+
+.shop:hover {
+    background: #ffe066;
+}
+
+.achievements {
+    background: #800080;
+    color: #fff;
+}
+
+.achievements:hover {
+    background: #a020a0;
+}
+
+.help {
+    background: #32b832;
+    color: #fff;
+}
+
+.help:hover {
+    background: #46dc46;
+}
+
+.settings {
+    background: #4682b4;
+    color: #fff;
+}
+
+.settings:hover {
+    background: #5a9bdc;
+}
+
+.exit {
+    background: #643232;
+    color: #fff;
+}
+
+.exit:hover {
+    background: #a04646;
+}
+
+/* Portrait orientation rotate removed */
+
+/* Utility classes to avoid inline styles */
+.fullscreen-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
+.hidden {
+    display: none;
+}
