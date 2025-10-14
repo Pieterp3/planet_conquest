@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planet Game - Achievements</title>
+    <script src="js/PathHelper.js"></script>
     <link rel="stylesheet" href="css/main-shared.css">
     <script defer src="js/PersistentStorage.js"></script>
     <script defer src="js/home/game/challenges/ChallengeManager.js"></script>
@@ -216,7 +217,7 @@
                     document.body.innerHTML = `
                         <div style="color: white; text-align: center; padding: 50px; font-family: Arial;">
                             <h1>Loading Achievements...</h1>
-                            <p>If this persists, <a href="mainmenu.html" style="color: #00f;">return to menu</a></p>
+                            <p>If this persists, <a href="#" onclick="window.navigateTo('index.html')" style="color: #00f;">return to menu</a></p>
                         </div>
                     `;
                 }
@@ -258,7 +259,7 @@
         </div>
     </div>
 
-    <script src="../js/BackgroundArtist.js"></script>
+    <script src="js/BackgroundArtist.js"></script>
     <script src="../js/home/game/operators/player/PlayerData.js"></script>
     <script src="../js/home/game/challenges/ChallengeManager.js"></script>
     <script>

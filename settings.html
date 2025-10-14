@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planet Game - Settings</title>
-    <link rel="stylesheet" href="../css/main-shared.css">
+    <script src="js/PathHelper.js"></script>
+    <link rel="stylesheet" href="css/main-shared.css">
     <style>
         body {
             margin: 0;
@@ -270,7 +271,7 @@
 
 <body>
     <canvas id="background-canvas"></canvas>
-    <a href="mainmenu.html" class="back-button">← Back to Menu</a>
+    <a href="#" onclick="window.navigateTo('index.html')" class="back-button">← Back to Menu</a>
 
     <div class="settings-container">
         <div class="settings-header">
@@ -407,7 +408,7 @@
         </div>
     </div>
 
-    <script src="../js/BackgroundArtist.js"></script>
+    <script src="js/BackgroundArtist.js"></script>
     <script src="../js/home/game/VisualSettings.js"></script>
     <script>
         // Initialize background

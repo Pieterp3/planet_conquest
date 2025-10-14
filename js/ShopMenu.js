@@ -177,11 +177,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 animateBtnCoin();
             }
             btn.addEventListener('click', () => {
-                if (window.purchaseUpgrade(upgrade.key)) {
+                const cost = window.getUpgradeCost(upgrade.key);
+                const currentLevel = window.upgradeLevels[upgrade.key] || 0;
+                const maxLevel = upgrade.maxLevel || 30;
+                
+                if (currentLevel >= maxLevel) {
+                    showMessageDialog('Max Level Reached', `${upgrade.name} is already at maximum level (${maxLevel})!`);
+                } else if (window.playerCoins < cost) {
+                    showMessageDialog('Not Enough Coins', `You need ${cost} coins to purchase this upgrade.\n\nYou currently have ${window.playerCoins} coins.`);
+                } else if (window.purchaseUpgrade(upgrade.key)) {
                     updateCoinDisplay();
                     renderUpgrades();
-                } else {
-                    alert('Not enough coins or max level reached!');
+                    showMessageDialog('Purchase Successful!', `${upgrade.name} upgraded to level ${currentLevel + 1}!`);
                 }
             });
             card.appendChild(info);
@@ -276,11 +283,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 animateBtnCoin();
             }
             btn.addEventListener('click', () => {
-                if (window.purchaseAbility(ability.name, ability.cost)) {
+                const currentCoins = parseInt(document.getElementById('coin-count').textContent);
+                const playerData = window.getPlayerData();
+                const isUnlocked = playerData.unlockedAbilities[ability.name];
+                
+                if (isUnlocked) {
+                    showMessageDialog('Already Purchased', 'You have already purchased this ability!');
+                } else if (currentCoins < ability.cost) {
+                    showMessageDialog('Insufficient Coins', `You need ${ability.cost} coins to purchase this ability. You currently have ${currentCoins} coins.`);
+                } else if (window.purchaseAbility(ability.name, ability.cost)) {
                     updateCoinDisplay();
                     renderAbilities();
+                    showMessageDialog('Purchase Successful', `Successfully purchased ${ability.name}!`);
                 } else {
-                    alert('Not enough coins or already purchased!');
+                    showMessageDialog('Purchase Failed', 'Unable to complete purchase. Please try again.');
                 }
             });
             card.appendChild(info);

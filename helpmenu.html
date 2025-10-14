@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planet Game - Help</title>
-    <link rel="stylesheet" href="../css/main-shared.css">
+    <script src="js/PathHelper.js"></script>
+    <link rel="stylesheet" href="css/main-shared.css">
     <style>
         body {
             margin: 0;
@@ -14,6 +15,8 @@
             color: #fff;
             font-family: 'Orbitron', monospace;
             overflow-x: hidden;
+            display: flex;
+            height: 100vh;
         }
 
         #background-canvas {
@@ -25,12 +28,64 @@
             z-index: -1;
         }
 
-        .help-container {
-            max-width: 800px;
-            margin: 0 auto;
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 30, 0.9);
+            border-right: 2px solid #00f;
+            padding: 20px 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #00bfff;
+            text-align: center;
+            margin: 0 0 30px 0;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px #00f;
+        }
+
+        .tab-button {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 0 20px 10px 20px;
+            background: rgba(0, 100, 255, 0.3);
+            border: 2px solid #00f;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'Orbitron', monospace;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .tab-button:hover {
+            background: rgba(0, 100, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        .tab-button.active {
+            background: #00f;
+            box-shadow: 0 0 15px rgba(0, 0, 255, 0.5);
+        }
+
+        .content-container {
+            margin-left: 250px;
             padding: 20px;
+            max-width: 800px;
+            flex: 1;
             position: relative;
             z-index: 1;
+            overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
         }
 
         .help-header {
@@ -44,23 +99,29 @@
             text-shadow: 0 0 10px #00f;
         }
 
-        .help-section {
+        .tab-content {
+            display: none;
             background: rgba(0, 0, 20, 0.8);
             border: 2px solid #00f;
             border-radius: 10px;
-            padding: 20px;
+            padding: 30px;
             margin: 20px 0;
             -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
         }
 
-        .help-section h2 {
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
             color: #00bfff;
             border-bottom: 1px solid #00f;
             padding-bottom: 10px;
+            margin-top: 0;
         }
 
-        .help-section h3 {
+        .tab-content h3 {
             color: #87ceeb;
             margin-top: 20px;
         }
@@ -82,9 +143,9 @@
         }
 
         .back-button {
-            position: fixed;
+            position: absolute;
             top: 20px;
-            left: 20px;
+            right: 20px;
             background: rgba(0, 100, 255, 0.8);
             border: 2px solid #00f;
             color: white;
@@ -93,274 +154,282 @@
             text-decoration: none;
             font-family: 'Orbitron', monospace;
             transition: all 0.3s;
-            z-index: 10;
+            z-index: 20;
         }
 
         .back-button:hover {
             background: #00f;
-            box-shadow: 0 0 20px #00f;
-        }
-
-        .abilities-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .ability-card {
-            background: rgba(0, 0, 40, 0.5);
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .ability-card h3 {
-            color: #87ceeb;
-            margin: 0 0 10px 0;
-        }
-
-        .ability-card p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        .upgrades-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .upgrade-card {
-            background: rgba(40, 0, 40, 0.5);
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .upgrade-card h3 {
-            color: #ffaa88;
-            margin: 0 0 10px 0;
-        }
-
-        .upgrade-card p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .help-container {
-                padding: 10px;
-            }
-
-            .help-header h1 {
-                font-size: 2rem;
-            }
-
-            .controls-grid {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-
-            .abilities-grid,
-            .upgrades-grid {
-                grid-template-columns: 1fr;
-            }
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 255, 0.3);
         }
     </style>
 </head>
 
 <body>
     <canvas id="background-canvas"></canvas>
-    <a href="mainmenu.html" class="back-button">← Back to Menu</a>
+    
+    <div class="sidebar">
+        <h2>Help Topics</h2>
+        <button class="tab-button active" data-tab="objective">🎯 Game Objective</button>
+        <button class="tab-button" data-tab="controls">🎮 Controls</button>
+        <button class="tab-button" data-tab="gameplay">🌍 Gameplay Mechanics</button>
+        <button class="tab-button" data-tab="abilities">⚡ Special Abilities</button>
+        <button class="tab-button" data-tab="upgrades">📈 Upgrade System</button>
+        <button class="tab-button" data-tab="strategy">🏆 Strategy Tips</button>
+        <button class="tab-button" data-tab="difficulty">🎚️ Difficulty Levels</button>
+    </div>
 
-    <div class="help-container">
+    <div class="content-container">
+        <a href="#" onclick="window.navigateTo('index.html')" class="back-button">← Back to Menu</a>
+
         <div class="help-header">
             <h1>Planet Game - Help Guide</h1>
             <p>Master the galaxy through strategic planet conquest</p>
         </div>
 
-        <div class="help-section">
+        <div id="objective" class="tab-content active">
             <h2>🎯 Game Objective</h2>
-            <p>Conquer all enemy planets while defending your own. Deploy ships from your planets to attack enemy
-                territories and expand your galactic empire.</p>
+            <p>Your mission is to conquer the galaxy by capturing enemy planets and defending your own territory.</p>
+            <p><strong>Victory Conditions:</strong> Capture all enemy planets or destroy all enemy forces to win the game.</p>
         </div>
 
-        <div class="help-section">
+        <div id="controls" class="tab-content">
             <h2>🎮 Controls</h2>
+            <h3>🖱️ Mouse Controls</h3>
             <div class="controls-grid">
                 <div class="control-key">Left Click</div>
-                <div>Select planet / Deploy ships</div>
-
+                <div>Select planets and deploy ships</div>
                 <div class="control-key">Right Click</div>
-                <div>Cancel selection</div>
+                <div>Quick planet selection</div>
+                <div class="control-key">Mouse Hover</div>
+                <div>View planet information and ship paths</div>
+            </div>
 
-                <div class="control-key">Space</div>
+            <h3>⌨️ Keyboard Shortcuts</h3>
+            <div class="controls-grid">
+                <div class="control-key">SPACE</div>
                 <div>Pause/Resume game</div>
-
                 <div class="control-key">ESC</div>
-                <div>Pause menu</div>
-
-                <div class="control-key">1</div>
-                <div>Freeze ability</div>
-
-                <div class="control-key">2</div>
-                <div>Shield ability</div>
-
-                <div class="control-key">3</div>
-                <div>Planetary Flame ability</div>
-
-                <div class="control-key">4</div>
-                <div>Black Hole ability</div>
+                <div>Open pause menu</div>
+                <div class="control-key">Q</div>
+                <div>Activate Freeze ability</div>
+                <div class="control-key">W</div>
+                <div>Activate Shield ability</div>
+                <div class="control-key">E</div>
+                <div>Activate Factory Hype ability</div>
+                <div class="control-key">R</div>
+                <div>Activate Black Hole ability</div>
+                <div class="control-key">T</div>
+                <div>Activate Planetary Flame ability</div>
             </div>
         </div>
 
-        <div class="help-section">
+        <div id="gameplay" class="tab-content">
             <h2>🌍 Gameplay Mechanics</h2>
+            <h3>🪐 Planet Management</h3>
+            <ul>
+                <li><strong>Ship Production:</strong> Planets automatically produce ships over time</li>
+                <li><strong>Planet Health:</strong> Planets can be damaged and destroyed by enemy attacks</li>
+                <li><strong>Orbital Motion:</strong> Planets move in elliptical orbits around the central star</li>
+                <li><strong>Strategic Value:</strong> Larger planets produce ships faster</li>
+            </ul>
 
-            <h3>Planet Management</h3>
-            <p>• Planets continuously produce ships at different rates</p>
-            <p>• Larger planets produce ships faster</p>
-            <p>• Damaged planets have reduced production until they heal</p>
+            <h3>🚀 Ship Deployment</h3>
+            <ul>
+                <li>Click on your planet to select it</li>
+                <li>Click on target planet to send ships</li>
+                <li>Ships will automatically engage enemy forces</li>
+                <li>Ships use intelligent pathfinding and interception</li>
+            </ul>
 
-            <h3>Ship Deployment</h3>
-            <p>• Click your planet, then click target to send ships</p>
-            <p>• Ships travel in orbital patterns around the central star</p>
-            <p>• Ships automatically engage enemy ships defending their targets</p>
-
-            <h3>Combat System</h3>
-            <p>• Ships fire projectiles at nearby enemies</p>
-            <p>• Combat occurs when ships get within range</p>
-            <p>• Ships prioritize defending their origin planet</p>
+            <h3>⚔️ Combat System</h3>
+            <ul>
+                <li>Ships automatically fight nearby enemies</li>
+                <li>Combat occurs when ships are within engagement range</li>
+                <li>Projectiles have realistic ballistics and limited range</li>
+                <li>Ships prioritize defending their origin planet</li>
+            </ul>
         </div>
 
-        <div class="help-section">
+        <div id="abilities" class="tab-content">
             <h2>⚡ Special Abilities</h2>
-            <p>Unlock powerful abilities in the Shop to turn the tide of battle!</p>
-            
-            <div class="abilities-grid">
-                <div class="ability-card">
-                    <h3>❄️ Freeze (Key: 1)</h3>
-                    <p>Stops enemy planets from spawning ships</p>
-                </div>
-                <div class="ability-card">
-                    <h3>🛡️ Shield (Key: 2)</h3>
-                    <p>Makes your planets and ships invulnerable</p>
-                </div>
-                <div class="ability-card">
-                    <h3>🔥 Planetary Flame (Key: 3)</h3>
-                    <p>Spews fire from player planets, damaging enemies</p>
-                </div>
-                <div class="ability-card">
-                    <h3>⚫ Black Hole (Key: 4)</h3>
-                    <p>Spawns black hole that damages enemy planets in orbit</p>
-                </div>
-                <div class="ability-card">
-                    <h3>🚀 Missile Barrage</h3>
-                    <p>Sends missiles at random enemy planets</p>
-                </div>
-                <div class="ability-card">
-                    <h3>⚡ Factory Hype</h3>
-                    <p>Your planets spawn ships 3x faster</p>
-                </div>
-                <div class="ability-card">
-                    <h3>🔧 Improved Factories</h3>
-                    <p>Doubles ship speed, damage and health</p>
-                </div>
-                <div class="ability-card">
-                    <h3>💚 Answered Prayers</h3>
-                    <p>Heals all damaged planets</p>
-                </div>
-                <div class="ability-card">
-                    <h3>💜 Curse</h3>
-                    <p>Reduces enemy ship stats by 20%</p>
-                </div>
-                <div class="ability-card">
-                    <h3>🦠 Planetary Infection</h3>
-                    <p>Infects enemy planets to send ships for you</p>
-                </div>
-                <div class="ability-card">
-                    <h3>⚔️ Unstoppable Ships</h3>
-                    <p>Makes your ships invulnerable for a duration</p>
-                </div>
-                <div class="ability-card">
-                    <h3>🧊 Orbital Freeze</h3>
-                    <p>Freezes planets in their orbital position</p>
-                </div>
-            </div>
+            <h3>❄️ Freeze (Q)</h3>
+            <p>Temporarily freezes all enemy ships, making them unable to move or attack. Duration and cooldown can be upgraded.</p>
+
+            <h3>🛡️ Shield (W)</h3>
+            <p>Provides temporary invulnerability to your planets, protecting them from all damage. Perfect for defensive strategies.</p>
+
+            <h3>🏭 Factory Hype (E)</h3>
+            <p>Dramatically increases ship production rate for all your planets. Use during critical moments to overwhelm enemies.</p>
+
+            <h3>🌑 Black Hole (R)</h3>
+            <p>Creates a powerful gravitational anomaly that damages nearby enemy planets over time. Strategic placement is key.</p>
+
+            <h3>🔥 Planetary Flame (T)</h3>
+            <p>Inflicts continuous damage to enemy planets within a large radius. Effective against clustered enemy territories.</p>
+
+            <h3>💀 Curse Planet</h3>
+            <p>Curses an enemy planet, reducing its ship production and making it more vulnerable to attacks.</p>
+
+            <h3>🦠 Planetary Infection</h3>
+            <p>Temporarily converts an enemy planet to produce ships for you. Duration varies by upgrade level.</p>
         </div>
 
-        <div class="help-section">
+        <div id="upgrades" class="tab-content">
             <h2>📈 Upgrade System</h2>
-            <p>Spend coins in the Shop to upgrade your capabilities permanently!</p>
-            
-            <div class="upgrades-grid">
-                <div class="upgrade-card">
-                    <h3>⚡ Ship Speed</h3>
-                    <p>Increase ship movement speed</p>
-                </div>
-                <div class="upgrade-card">
-                    <h3>💪 Ship Health</h3>
-                    <p>Increase ship health points</p>
-                </div>
-                <div class="upgrade-card">
-                    <h3>⚔️ Ship Damage</h3>
-                    <p>Increase ship combat damage</p>
-                </div>
-                <div class="upgrade-card">
-                    <h3>🏭 Planet Production</h3>
-                    <p>Increase planet ship production rate</p>
-                </div>
-                <div class="upgrade-card">
-                    <h3>🛡️ Planet Health</h3>
-                    <p>Increase planet health points</p>
-                </div>
-                <div class="upgrade-card">
-                    <h3>⏱️ Ability Cooldown</h3>
-                    <p>Reduce ability cooldown time</p>
-                </div>
-            </div>
+            <h3>💰 Earning Coins</h3>
+            <ul>
+                <li>Win games to earn coins based on difficulty</li>
+                <li>Higher difficulties provide more coin rewards</li>
+                <li>Complete challenges for bonus coins</li>
+                <li>Donate coins in the shop for special rewards</li>
+            </ul>
+
+            <h3>🔧 Available Upgrades</h3>
+            <ul>
+                <li><strong>Ship Speed:</strong> Increases movement speed of all ships</li>
+                <li><strong>Ship Health:</strong> Makes ships more durable in combat</li>
+                <li><strong>Planet Production:</strong> Increases ship production rate</li>
+                <li><strong>Planet Health:</strong> Makes planets harder to destroy</li>
+                <li><strong>Ability Cooldowns:</strong> Reduces time between ability uses</li>
+            </ul>
+
+            <h3>🎯 Upgrade Strategy</h3>
+            <ul>
+                <li>Early game: Focus on ship speed and production</li>
+                <li>Mid game: Balance offense and defense upgrades</li>
+                <li>Late game: Maximize ability cooldowns for tactical advantage</li>
+                <li>Upgrade costs increase exponentially with level</li>
+            </ul>
         </div>
 
-        <div class="help-section">
+        <div id="strategy" class="tab-content">
             <h2>🏆 Strategy Tips</h2>
-            <p>• Focus on capturing larger planets for faster ship production</p>
-            <p>• Use abilities strategically during critical moments</p>
-            <p>• Defend your key planets while expanding your territory</p>
-            <p>• Watch orbital patterns to time your attacks</p>
-            <p>• Upgrade your abilities in the shop for better effectiveness</p>
+            <h3>🎯 Early Game Strategy</h3>
+            <ul>
+                <li>Secure nearby neutral planets quickly</li>
+                <li>Focus on expanding your territory before heavy combat</li>
+                <li>Use ship speed to your advantage in early rushes</li>
+            </ul>
+
+            <h3>⚔️ Combat Tactics</h3>
+            <ul>
+                <li>Use abilities defensively to protect key planets</li>
+                <li>Coordinate attacks on multiple fronts</li>
+                <li>Target enemy production planets first</li>
+                <li>Use orbital mechanics to predict enemy movements</li>
+            </ul>
+
+            <h3>🛡️ Defensive Play</h3>
+            <ul>
+                <li>Keep reserve ships at key defensive positions</li>
+                <li>Use Shield ability during major enemy attacks</li>
+                <li>Maintain control of central, high-production planets</li>
+            </ul>
         </div>
 
-        <div class="help-section">
+        <div id="difficulty" class="tab-content">
             <h2>🎚️ Difficulty Levels</h2>
-            <p><strong>Easy:</strong> Slower enemies, more time to strategize</p>
-            <p><strong>Medium:</strong> Balanced gameplay experience</p>
-            <p><strong>Hard:</strong> Faster enemies, more aggressive AI</p>
-            <p><strong>Extreme:</strong> Maximum challenge, AI uses abilities</p>
+            <h3>🟢 Easy</h3>
+            <ul>
+                <li>Slower AI decision making</li>
+                <li>Fewer enemy planets</li>
+                <li>Reduced AI aggression</li>
+                <li>No AI special abilities</li>
+                <li>Lower coin rewards (0.5x multiplier)</li>
+            </ul>
+
+            <h3>🟡 Medium</h3>
+            <ul>
+                <li>Balanced AI behavior</li>
+                <li>Standard planet distribution</li>
+                <li>Moderate AI aggression</li>
+                <li>No AI special abilities</li>
+                <li>Normal coin rewards (1.0x multiplier)</li>
+            </ul>
+
+            <h3>🟠 Hard</h3>
+            <ul>
+                <li>Faster AI decisions</li>
+                <li>More enemy planets</li>
+                <li>Increased AI aggression</li>
+                <li>AI uses special abilities</li>
+                <li>Higher coin rewards (1.5x multiplier)</li>
+            </ul>
+
+            <h3>🔴 Extreme</h3>
+            <ul>
+                <li>Lightning-fast AI reactions</li>
+                <li>Maximum enemy presence</li>
+                <li>Highly aggressive AI behavior</li>
+                <li>Full AI ability usage</li>
+                <li>Maximum coin rewards (2.0x multiplier)</li>
+            </ul>
         </div>
     </div>
 
-    <script src="../js/BackgroundArtist.js"></script>
+    <script src="js/BackgroundArtist.js"></script>
     <script>
-        // Initialize animated background
-        const bgCanvas = document.getElementById('background-canvas');
-        const bgCtx = bgCanvas.getContext('2d');
-
-        function resizeBackground() {
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-        }
-
-        resizeBackground();
-        window.addEventListener('resize', resizeBackground);
-
-        function animateBackground() {
-            if (window.BackgroundArtist && window.BackgroundArtist.renderBackground) {
-                window.BackgroundArtist.renderBackground(bgCtx);
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            const selectedContent = document.getElementById(tabName);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
             }
-            requestAnimationFrame(animateBackground);
+            
+            // Add active class to selected button
+            const selectedButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (selectedButton) {
+                selectedButton.classList.add('active');
+            }
+        }
+        
+        // Add event listeners to tab buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
+                showTab(tabName);
+            });
+        });
+
+        // Initialize background animation
+        const canvas = document.getElementById('background-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        if (typeof BackgroundArtist !== 'undefined') {
+            const backgroundArtist = new BackgroundArtist();
+            
+            function animateBackground() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                backgroundArtist.tick();
+                backgroundArtist.paint(ctx, canvas.width, canvas.height);
+                requestAnimationFrame(animateBackground);
+            }
+            
+            animateBackground();
         }
 
-        animateBackground();
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 

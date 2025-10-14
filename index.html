@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="js/PathHelper.js"></script>
     <script defer src="js/PersistentStorage.js"></script>
     <script defer src="js/home/game/challenges/ChallengeManager.js"></script>
     <script defer src="js/AchievementMenu.js"></script>
@@ -62,26 +63,26 @@
 
         function openGameMenu(difficulty) {
             // Implement navigation to game menu with selected difficulty
-            window.location.href = 'gamemenu.html?difficulty=' + encodeURIComponent(difficulty);
+            window.navigateTo('gamemenu.html?difficulty=' + encodeURIComponent(difficulty));
         }
         function openShop() {
-            window.location.href = 'shopmenu.html';
+            window.navigateTo('shopmenu.html');
         }
         function openAchievements() {
             // Navigate to achievements page
-            window.location.href = 'achievements.html';
+            window.navigateTo('achievements.html');
         }
         function openHelp() {
             // Navigate to help page
-            window.location.href = 'helpmenu.html';
+            window.navigateTo('helpmenu.html');
         }
         function openSettings() {
             // Navigate to settings page
-            window.location.href = 'settings.html';
+            window.navigateTo('settings.html');
         }
         function exitGame() {
-            // Implement exit logic (redirect to goodbye page)
-            window.location.href = 'goodbye.html';
+            // For web version, just show a farewell message instead of closing
+            alert('Thanks for playing Planet Conquest! 🚀\n\nBookmark this page to return anytime.');
         }
     </script>
 </body>
